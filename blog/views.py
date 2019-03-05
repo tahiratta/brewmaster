@@ -292,10 +292,10 @@ def upload_csv(request):
                 # data_dict["notes"] = fields[3]
                 # # print('data_dict', data_dict)
                 if fields[10] == '':
-                    fields[10] = datetime.datetime.now()
+                    fields[10] = datetime.now()
 
                 if fields[17] == '':
-                    fields[17] = datetime.datetime.now()
+                    fields[17] = datetime.now()
 
                 print('fieldno10',fields[10])
 
