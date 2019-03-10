@@ -18,206 +18,213 @@ from django_project.settings import MEDIA_URL
 # Create your views here.
 @login_required
 def home(request):
-    if request.method == 'POST':
-        print('this',request.POST.get('count'))
+    if Customers.objects.all().exists():
 
-        fromDate = request.POST.get('fromDate')
-        first = datetime.strptime('1900-01-01', '%Y-%m-%d')
-        if fromDate is not '':
-            first = datetime.strptime(fromDate, '%Y-%m-%d')
-            print('pehli date',first)
-            # first_ago = first - timedelta(days=1)
+        if request.method == 'POST':
+            print('this',request.POST.get('count'))
 
-        toDate = request.POST.get('toDate')
-        last_advent = datetime.strptime('1900-01-01', '%Y-%m-%d')
-        if toDate is not '':
-            last = datetime.strptime(toDate, '%Y-%m-%d')
-            last_advent = last + timedelta(days=1)
-            print('aakhri date', last_advent)
+            fromDate = request.POST.get('fromDate')
+            first = datetime.strptime('1900-01-01', '%Y-%m-%d')
+            if fromDate is not '':
+                first = datetime.strptime(fromDate, '%Y-%m-%d')
+                print('pehli date',first)
+                # first_ago = first - timedelta(days=1)
 
-        greater = datetime.now()
-        gDate = request.POST.get('gDate')
-        if gDate is not '':
-            greater = datetime.strptime(gDate, '%Y-%m-%d')
+            toDate = request.POST.get('toDate')
+            last_advent = datetime.strptime('1900-01-01', '%Y-%m-%d')
+            if toDate is not '':
+                last = datetime.strptime(toDate, '%Y-%m-%d')
+                last_advent = last + timedelta(days=1)
+                print('aakhri date', last_advent)
 
-        lower = datetime.strptime('1900-01-01', '%Y-%m-%d')
-        lDate = request.POST.get('lDate')
-        if lDate is not '':
-            lower = datetime.strptime(lDate, '%Y-%m-%d')
+            greater = datetime.now()
+            gDate = request.POST.get('gDate')
+            if gDate is not '':
+                greater = datetime.strptime(gDate, '%Y-%m-%d')
 
-        order_total = request.POST.get('total')
-        order_count = request.POST.get('count')
+            lower = datetime.strptime('1900-01-01', '%Y-%m-%d')
+            lDate = request.POST.get('lDate')
+            if lDate is not '':
+                lower = datetime.strptime(lDate, '%Y-%m-%d')
 
-        order_total = 0.00 if order_total == '' else float(order_total)
-        order_count = -1 if order_count == '' else int(order_count)
+            order_total = request.POST.get('total')
+            order_count = request.POST.get('count')
 
-        print('totla and count', order_total, order_count)
+            order_total = 0.00 if order_total == '' else float(order_total)
+            order_count = -1 if order_count == '' else int(order_count)
 
-        date_param = Q(order_date__range=[first, last_advent])
-        ldate_param = Q(order_date__lt=lower)
-        gdate_param = Q(order_date__gt=greater)
-        order_total = Q(order_total__gt=order_total)
+            print('totla and count', order_total, order_count)
 
-        customers_list = []
-        all_customers = Customers.objects.all()
-        for c in all_customers:
-            customer_key = c.customer_id
-            all_orders = Orders.objects.filter(customer_id=customer_key)
-            count = 0
-            for o in all_orders:
-                customer_id = o.customer_id.customer_id
-                count += 1
-            order_customer_id = Q(customer_id=0)
-            if count > order_count and order_count != -1:
-                print('aa gya is k andar')
-                customers_list.append(customer_id)
-                order_customer_id = Q(customer_id__in=customers_list)
+            date_param = Q(order_date__range=[first, last_advent])
+            ldate_param = Q(order_date__lt=lower)
+            gdate_param = Q(order_date__gt=greater)
+            order_total = Q(order_total__gt=order_total)
 
-        print('saare params ajain yahan',date_param, ldate_param, gdate_param, order_total, order_customer_id, order_count, count)
+            customers_list = []
+            all_customers = Customers.objects.all()
+            for c in all_customers:
+                customer_key = c.customer_id
+                all_orders = Orders.objects.filter(customer_id=customer_key)
+                count = 0
+                for o in all_orders:
+                    customer_id = o.customer_id.customer_id
+                    count += 1
+                order_customer_id = Q(customer_id=0)
+                if count > order_count and order_count != -1:
+                    print('aa gya is k andar')
+                    customers_list.append(customer_id)
+                    order_customer_id = Q(customer_id__in=customers_list)
 
-        orders = Orders.objects.order_by("-order_date").filter(date_param | ldate_param | gdate_param | order_total | order_customer_id)
-        print("orders")
-        print(orders)
+            print('saare params ajain yahan',date_param, ldate_param, gdate_param, order_total, order_customer_id, order_count, count)
 
-        if orders:
-            columns = request.POST.getlist('dropdown')
-            read = []
-            l = 0
-            for ord in orders:
-                for i in columns:
-                    print('i my meS', i)
-                    if i == 'first_name':
-                        j = ord.customer_id.first_name
+            orders = Orders.objects.order_by("-order_date").filter(date_param | ldate_param | gdate_param | order_total | order_customer_id)
+            print("orders")
+            print(orders)
 
-                    if i == 'last_name':
-                        j = ord.customer_id.last_name
+            if orders:
+                columns = request.POST.getlist('dropdown')
+                read = []
+                l = 0
+                for ord in orders:
+                    for i in columns:
+                        print('i my meS', i)
+                        if i == 'first_name':
+                            j = ord.customer_id.first_name
 
-                    if i == 'address_1':
-                        j = ord.customer_id.address_1
+                        if i == 'last_name':
+                            j = ord.customer_id.last_name
 
-                    if i == 'address_2':
-                        j = ord.customer_id.address_2
+                        if i == 'address_1':
+                            j = ord.customer_id.address_1
 
-                    if i == 'city':
-                        j = ord.customer_id.city
+                        if i == 'address_2':
+                            j = ord.customer_id.address_2
 
-                    if i == 'state':
-                        j = ord.customer_id.state
+                        if i == 'city':
+                            j = ord.customer_id.city
 
-                    if i == 'zip_code':
-                        j = ord.customer_id.zip_code
+                        if i == 'state':
+                            j = ord.customer_id.state
 
-                    if i == 'country':
-                        j = ord.customer_id.country
+                        if i == 'zip_code':
+                            j = ord.customer_id.zip_code
 
-                    if i == 'country_code':
-                        j = ord.customer_id.country_code
+                        if i == 'country':
+                            j = ord.customer_id.country
 
-                    if j != '':
-                        read.append(j)
-                        print('Please write it', read)
-                l += 1
+                        if i == 'country_code':
+                            j = ord.customer_id.country_code
+
+                        if j != '':
+                            read.append(j)
+                            print('Please write it', read)
+                    l += 1
 
 
-            # # s = orders[0].order_date.strftime('%Y%m%d%H%M%S%f')
-            # s = datetime.now().strftime('%Y%m%d%H%M%S%f')
-            # print(s)
-            # tail = s[-4:]
-            # f = round(float(tail), 3)
-            # temp = "%.3f" % f
-            # print((s[:-4], temp[1:]))
-            # print(type(s[-4:]))
-            # date_time = s[:-4]
-            #
-            # filename = "orders" + date_time + ".xlsx"
-            # wb = xlsxwriter.Workbook(filename)
-            # ws = wb.add_worksheet("responses %s" % date_time)
-            # row_num = 0
-            #
-            # # font_style = xlsxwriter.XFStyle()
-            # font_style = wb.add_format()
-            # font_style.set_bold()
-            # # font_style.font.bold = True
-            #
-            # print('dropdown bhai jaan', request.POST.getlist('dropdown'))
-            #
-            # columns = request.POST.getlist('dropdown')
-            # # columns = ['first_name', 'last_name', 'address_1', 'address_2', 'city', 'state', 'zip_code', 'country', 'country_code' ]
-            #
-            # for col_num in range(len(columns)):
-            #     ws.write(row_num, col_num, columns[col_num], font_style)
-            #
-            # font_style = wb.add_format()
-            # font_style.set_bold(False)
-            #
-            # write = []
-            # k = 0
-            # for ord in orders:
-            #     for i in columns:
-            #         if row_num <= 1048574:
-            #             print('i my meS', i)
-            #             if i == 'first_name':
-            #                 j = ord.customer_id.first_name
-            #
-            #             if i == 'last_name':
-            #                 j = ord.customer_id.last_name
-            #
-            #             if i == 'address_1':
-            #                 j = ord.customer_id.address_1
-            #
-            #             if i == 'address_2':
-            #                 j = ord.customer_id.address_2
-            #
-            #             if i == 'city':
-            #                 j = ord.customer_id.city
-            #
-            #             if i == 'state':
-            #                 j = ord.customer_id.state
-            #
-            #             if i == 'zip_code':
-            #                 j = ord.customer_id.zip_code
-            #
-            #             if i == 'country':
-            #                 j = ord.customer_id.country
-            #
-            #             if i == 'country_code':
-            #                 j = ord.customer_id.country_code
-            #
-            #         if j != '':
-            #             write.append(j)
-            #             print('Please write it', write)
-            #
-            #     # print("before increment")
-            #     # print(row_num)
-            #     # row_num += 1
-            #     # print("after increment")
-            #     # print(row_num)
-            #     # # print(row)
-            #     # ws.write(row_num, 0, write, font_style)
-            #     # ws.write(row_num, 1, write, font_style)
-            #     # ws.write(row_num, 2, write, font_style)
-            #     # ws.write(row_num, 3, write, font_style)
-            #     # ws.write(row_num, 4, write, font_style)
-            #     # ws.write(row_num, 5, write, font_style)
-            #     # ws.write(row_num, 6, write, font_style)
-            #     # ws.write(row_num, 7, write, font_style)
-            #     # ws.write(row_num, 8, write, font_style)
-            #     # print('ab tak row num', row_num)
-            #
-            #     k += 1
-            #     for row_num in range(len(write)):
-            #         ws.write(k, row_num, write[row_num], font_style)
-            #
-            # row_num += 2
-            # wb.close()
-            # # return Response({"status": status.HTTP_200_OK, "link": "Downloads/" + filename})
-            # print('success')
-            return render(request, 'blog/home.html', {'orders': orders, 'columns': columns, 'read': read})
+                # # s = orders[0].order_date.strftime('%Y%m%d%H%M%S%f')
+                # s = datetime.now().strftime('%Y%m%d%H%M%S%f')
+                # print(s)
+                # tail = s[-4:]
+                # f = round(float(tail), 3)
+                # temp = "%.3f" % f
+                # print((s[:-4], temp[1:]))
+                # print(type(s[-4:]))
+                # date_time = s[:-4]
+                #
+                # filename = "orders" + date_time + ".xlsx"
+                # wb = xlsxwriter.Workbook(filename)
+                # ws = wb.add_worksheet("responses %s" % date_time)
+                # row_num = 0
+                #
+                # # font_style = xlsxwriter.XFStyle()
+                # font_style = wb.add_format()
+                # font_style.set_bold()
+                # # font_style.font.bold = True
+                #
+                # print('dropdown bhai jaan', request.POST.getlist('dropdown'))
+                #
+                # columns = request.POST.getlist('dropdown')
+                # # columns = ['first_name', 'last_name', 'address_1', 'address_2', 'city', 'state', 'zip_code', 'country', 'country_code' ]
+                #
+                # for col_num in range(len(columns)):
+                #     ws.write(row_num, col_num, columns[col_num], font_style)
+                #
+                # font_style = wb.add_format()
+                # font_style.set_bold(False)
+                #
+                # write = []
+                # k = 0
+                # for ord in orders:
+                #     for i in columns:
+                #         if row_num <= 1048574:
+                #             print('i my meS', i)
+                #             if i == 'first_name':
+                #                 j = ord.customer_id.first_name
+                #
+                #             if i == 'last_name':
+                #                 j = ord.customer_id.last_name
+                #
+                #             if i == 'address_1':
+                #                 j = ord.customer_id.address_1
+                #
+                #             if i == 'address_2':
+                #                 j = ord.customer_id.address_2
+                #
+                #             if i == 'city':
+                #                 j = ord.customer_id.city
+                #
+                #             if i == 'state':
+                #                 j = ord.customer_id.state
+                #
+                #             if i == 'zip_code':
+                #                 j = ord.customer_id.zip_code
+                #
+                #             if i == 'country':
+                #                 j = ord.customer_id.country
+                #
+                #             if i == 'country_code':
+                #                 j = ord.customer_id.country_code
+                #
+                #         if j != '':
+                #             write.append(j)
+                #             print('Please write it', write)
+                #
+                #     # print("before increment")
+                #     # print(row_num)
+                #     # row_num += 1
+                #     # print("after increment")
+                #     # print(row_num)
+                #     # # print(row)
+                #     # ws.write(row_num, 0, write, font_style)
+                #     # ws.write(row_num, 1, write, font_style)
+                #     # ws.write(row_num, 2, write, font_style)
+                #     # ws.write(row_num, 3, write, font_style)
+                #     # ws.write(row_num, 4, write, font_style)
+                #     # ws.write(row_num, 5, write, font_style)
+                #     # ws.write(row_num, 6, write, font_style)
+                #     # ws.write(row_num, 7, write, font_style)
+                #     # ws.write(row_num, 8, write, font_style)
+                #     # print('ab tak row num', row_num)
+                #
+                #     k += 1
+                #     for row_num in range(len(write)):
+                #         ws.write(k, row_num, write[row_num], font_style)
+                #
+                # row_num += 2
+                # wb.close()
+                # # return Response({"status": status.HTTP_200_OK, "link": "Downloads/" + filename})
+                # print('success')
+                msg=''
+                return render(request, 'blog/home.html', {'orders': orders, 'columns': columns, 'read': read, 'msg':msg})
+        else:
+            customers = ''
+            orders = ''
+            form = DateForm()
+            msg=''
+            return render(request, 'blog/home.html', {'customers': customers, 'orders': orders, 'form': form, 'msg':msg})
     else:
-        customers = ''
-        orders = ''
         form = DateForm()
-        return render(request, 'blog/home.html', {'customers': customers, 'orders': orders, 'form': form})
+        return render(request, 'blog/home.html', {'form': form, 'msg': 'no file exists'})
 
 @login_required
 def file_upload(request):
@@ -292,10 +299,10 @@ def upload_csv(request):
                 # data_dict["notes"] = fields[3]
                 # # print('data_dict', data_dict)
                 if fields[10] == '':
-                    fields[10] = datetime.datetime.now()
+                    fields[10] = datetime.now()
 
                 if fields[17] == '':
-                    fields[17] = datetime.datetime.now()
+                    fields[17] = datetime.now()
 
                 print('fieldno10',fields[10])
 

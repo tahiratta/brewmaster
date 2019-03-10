@@ -38,6 +38,10 @@
 }
 
 $('select').selectpicker();
+
+function myFunction() {
+  confirm("please Upload a csv file first!");
+}
   </script>
 </head>
 
@@ -49,7 +53,7 @@ $('select').selectpicker();
             <h2> Filter Data</h2>
              {% csrf_token %}
              <div class="form-group">
-                  Select Fields : <select name="dropdown" class="selectpicker" multiple data-live-search="true">
+                  Select Fields : <select name="dropdown" class="selectpicker" multiple data-live-search="true" required="True">
                       <option value='first_name'>First Name</option>
                       <option value='last_name'>Last Name</option>
                       <option value='address_1'>Address 1</option>
@@ -78,9 +82,15 @@ $('select').selectpicker();
                 <!--<div class="form-group">-->
                     <!--<a  href="#" download class="download">Download</a>-->
                 <!--</div>-->
+             {% if msg == '' %}
                 <div class="form-group">
-                   <button type="submit" class="submit btn">Submit</button>
+                    <button class="btn btn-outline-info" type="submit">Submit</button>
                 </div>
+             {% else %}
+                <div class="form-group">
+                    <button class="btn btn-outline-info" type="submit" onclick="myFunction()">Submit</button>
+                </div>
+             {% endif %}
          </form>
 <br><br>
 <main class="main">
