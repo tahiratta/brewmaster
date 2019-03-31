@@ -34,6 +34,8 @@ EMAIL_HOST_PASSWORD = 'mobeenarchi2'
 EMAIL_PORT = 587
 CORS_ORIGIN_ALLOW_ALL = True
 
+AUTO_LOGOUT_DELAY = 1
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -57,6 +59,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'blog.middleware.AutoLogout'
 ]
 
 ROOT_URLCONF = 'django_project.urls'

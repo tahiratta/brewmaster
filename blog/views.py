@@ -24,6 +24,7 @@ def home(request):
             print('this',request.POST.get('count'))
 
             fromDate = request.POST.get('fromDate')
+            print('from date check kro zara', fromDate)
             first = datetime.strptime('1900-01-01', '%Y-%m-%d')
             if fromDate is not '':
                 first = datetime.strptime(fromDate, '%Y-%m-%d')
@@ -34,10 +35,10 @@ def home(request):
             last_advent = datetime.strptime('1900-01-01', '%Y-%m-%d')
             if toDate is not '':
                 last = datetime.strptime(toDate, '%Y-%m-%d')
-                last_advent = last + timedelta(days=1)
+                last_advent = last #+ timedelta(days=1)
                 print('aakhri date', last_advent)
 
-            greater = datetime.now()
+            greater = datetime.strptime('2050-01-01', '%Y-%m-%d')
             gDate = request.POST.get('gDate')
             if gDate is not '':
                 greater = datetime.strptime(gDate, '%Y-%m-%d')
@@ -50,7 +51,7 @@ def home(request):
             order_total = request.POST.get('total')
             order_count = request.POST.get('count')
 
-            order_total = 0.00 if order_total == '' else float(order_total)
+            order_total = 10000000000000.00 if order_total == '' else float(order_total)
             order_count = -1 if order_count == '' else int(order_count)
 
             print('totla and count', order_total, order_count)
@@ -58,10 +59,13 @@ def home(request):
             date_param = Q(order_date__range=[first, last_advent])
             ldate_param = Q(order_date__lt=lower)
             gdate_param = Q(order_date__gt=greater)
-            order_total = Q(order_total__gt=order_total)
+            order_total1 = Q(order_total__gt=order_total)
+
+            print('Q hai ye', order_total1)
 
             customers_list = []
             all_customers = Customers.objects.all()
+            order_customer_id = Q(customer_id=0)
             for c in all_customers:
                 customer_key = c.customer_id
                 all_orders = Orders.objects.filter(customer_id=customer_key)
@@ -69,17 +73,23 @@ def home(request):
                 for o in all_orders:
                     customer_id = o.customer_id.customer_id
                     count += 1
-                order_customer_id = Q(customer_id=0)
                 if count > order_count and order_count != -1:
                     print('aa gya is k andar')
                     customers_list.append(customer_id)
                     order_customer_id = Q(customer_id__in=customers_list)
 
-            print('saare params ajain yahan',date_param, ldate_param, gdate_param, order_total, order_customer_id, order_count, count)
+            print('saare params ajain yahan',date_param, ldate_param, gdate_param, order_total1, order_customer_id, order_count, count)
 
-            orders = Orders.objects.order_by("-order_date").filter(date_param | ldate_param | gdate_param | order_total | order_customer_id)
-            print("orders")
-            print(orders)
+            print('i want the select *',fromDate, toDate, gDate, lDate, order_total, order_count)
+
+            if fromDate == '' and toDate == '' and gDate == '' and lDate == '' and order_total == 10000000000000.00 and order_count == -1:
+                print('if part time')
+                orders = Orders.objects.all()
+            else:
+                orders = Orders.objects.order_by("-order_date").filter(
+                    date_param | ldate_param | gdate_param | order_total1 | order_customer_id)
+                print('else part time')
+                print(orders)
 
             if orders:
                 columns = request.POST.getlist('dropdown')
@@ -215,7 +225,16 @@ def home(request):
                 # # return Response({"status": status.HTTP_200_OK, "link": "Downloads/" + filename})
                 # print('success')
                 msg=''
-                return render(request, 'blog/home.html', {'orders': orders, 'columns': columns, 'read': read, 'msg':msg})
+                col_length = len(columns)
+                print('length of cols', col_length)
+                return render(request, 'blog/home.html', {'orders': orders, 'columns': columns, 'col_length':col_length, 'read': read, 'msg':msg})
+            else:
+                customers = ''
+                orders = ''
+                form = DateForm()
+                msg=''
+                return render(request, 'blog/home.html', {'customers': customers, 'orders': orders, 'form': form, 'msg':msg, 'no_data': 'No data found'})
+
         else:
             customers = ''
             orders = ''
@@ -276,10 +295,11 @@ def upload_csv(request):
             messages.error(request,'File is not CSV type')
             return HttpResponseRedirect(reverse("upload_csv"), {'msg':'Please upload file with .csv extension!'})
         #if file is too large, return
-        if csv_file.multiple_chunks():
-            print('file is too big')
-            messages.error(request,"Uploaded file is too big (%.2f MB)." % (csv_file.size/(1000*1000),))
-            return HttpResponseRedirect(reverse("upload_csv"), {'msg':'file is too big'})
+        # if csv_file.multiple_chunks():
+        #     print('file is too big')
+        #     messages.error(request,"Uploaded file is too big (%.2f MB)." % (csv_file.size/(1000*1000),))
+        #     return HttpResponseRedirect(reverse("upload_csv"), {'msg':'file is too big'})
+
 
         file_data = csv_file.read().decode("utf-8")
         lines = file_data.split("\n")
@@ -305,22 +325,48 @@ def upload_csv(request):
                     fields[17] = datetime.now()
 
                 print('fieldno10',fields[10])
+                print('is se agey nahi ja raha why ')
+                customer_exists = Customers.objects.filter(customer_id=fields[0])
+                if customer_exists.exists():
+                    print('is k andar ata hai ya nahi   ')
+                    customer_exists.delete()
+                    customer = Customers.objects.create(
+                        customer_id=fields[0],
+                        first_name=fields[1],
+                        last_name=fields[2],
+                        address_1=fields[3],
+                        address_2=fields[4],
+                        city=fields[5],
+                        state=fields[6],
+                        zip_code=fields[7],
+                        country=fields[8],
+                        country_code=fields[9],
+                        origin_date=fields[10],
+                        cust_email=fields[11],
+                        cust_media_origin=fields[13],
+                        cust_notes=fields[14]
 
-                customer, created = Customers.objects.update_or_create(
-                    customer_id=fields[0],
-                    first_name=fields[1],
-                    last_name=fields[2],
-                    address_1=fields[3],
-                    address_2=fields[4],
-                    city=fields[5],
-                    state=fields[6],
-                    zip_code=fields[7],
-                    origin_date=fields[10],
-                    cust_email=fields[11],
-                    cust_media_origin=fields[13],
-                    cust_notes=fields[14]
+                    )
+                    print('customer is updated')
+                else:
+                    customer = Customers.objects.create(
+                        customer_id=fields[0],
+                        first_name=fields[1],
+                        last_name=fields[2],
+                        address_1=fields[3],
+                        address_2=fields[4],
+                        city=fields[5],
+                        state=fields[6],
+                        zip_code=fields[7],
+                        country=fields[8],
+                        country_code=fields[9],
+                        origin_date=fields[10],
+                        cust_email=fields[11],
+                        cust_media_origin=fields[13],
+                        cust_notes=fields[14]
 
-                )
+                    )
+                    print('customer is not updated')
                 cust = Customers.objects.filter(customer_id=fields[0])
                 print('cust:', cust[0])
 
@@ -332,17 +378,33 @@ def upload_csv(request):
 
                 print('fileldein', fields[18], fields[19])
 
-                order, created = Orders.objects.update_or_create(
-                    customer_id=cust[0],
-                    order_id=fields[15],
-                    product_id=fields[16],
-                    order_date=fields[17],
-                    unit_price=fields[18],
-                    order_total=fields[19],
-                    order_detail=fields[20],
-                    ord_media_origin=fields[23]
-                )
-                print('ord:',order)
+                order_exists = Orders.objects.filter(customer_id=cust[0])
+                if order_exists.exists():
+                    order_exists.delete()
+                    order = Orders.objects.create(
+                        customer_id=cust[0],
+                        order_id=fields[15],
+                        product_id=fields[16],
+                        order_date=fields[17],
+                        unit_price=fields[18],
+                        order_total=fields[19],
+                        order_detail=fields[20],
+                        ord_media_origin=fields[23]
+                    )
+                    print('order is updated')
+
+                else:
+                    order = Orders.objects.create(
+                        customer_id=cust[0],
+                        order_id=fields[15],
+                        product_id=fields[16],
+                        order_date=fields[17],
+                        unit_price=fields[18],
+                        order_total=fields[19],
+                        order_detail=fields[20],
+                        ord_media_origin=fields[23]
+                    )
+                    print('order is not updated')
 
                 try:
                     form = DocumentForm()
@@ -354,6 +416,8 @@ def upload_csv(request):
                 except Exception as e:
                     logging.getLogger("error_logger").error(repr(e))
                     pass
+
+        messages.success(request, 'File is uploaded successfully')
 
     except Exception as e:
         logging.getLogger("error_logger").error("Unable to upload file. "+repr(e))

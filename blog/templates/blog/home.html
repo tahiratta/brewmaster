@@ -42,8 +42,15 @@ $('select').selectpicker();
 function myFunction() {
   confirm("please Upload a csv file first!");
 }
+
+
   </script>
 </head>
+
+{% if messages %}
+<ul class="messages">
+</ul>
+{% endif %}
 
   <div class="content-section">
     Upload Your File <a href="{% url 'upload_csv' %}"><u>Here</u></a>
@@ -76,7 +83,7 @@ function myFunction() {
                     Greater than Date : <input type="date" name="gDate" class="datepicker" >
                 </div>
                 <div class="form-group">
-                    Order Total : <input type="number" name="total" onchange="setTwoNumberDecimal" step="0.25" class="form-control" placeholder="0.00"><br>
+                    Order Total : <input type="number" name="total" onchange="setTwoNumberDecimal" step="0.01" class="form-control" placeholder="0.00"><br>
                     Order Count : <input type="number" name="count" class="form-control" placeholder="0">
                 </div>
                 <!--<div class="form-group">-->
@@ -104,13 +111,21 @@ function myFunction() {
                     </tr>
                 </thead>
                 <tbody>
-                {% for ord in orders %}
-                    <tr>
-                        {% for re in read %}
-                        <td>{{re}}</td>
-                        {% endfor %}
-                    </tr>
+                {% if orders != '' %}
+                <tr>
+                {% for re in read %}
+                    <td>{{ re }}</td>
+                    {% if not forloop.last and forloop.counter|divisibleby:col_length %}
+                </tr>
+                <tr>
+                    {% endif %}
                 {% endfor %}
+                </tr>
+                {% else %}
+                {{no_data}}
+                {% endif %}
+
+
                 </tbody>
             </table>
            </div>
