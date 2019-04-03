@@ -84,11 +84,18 @@ def home(request):
 
             if fromDate == '' and toDate == '' and gDate == '' and lDate == '' and order_total == 10000000000000.00 and order_count == -1:
                 print('if part time')
-                orders = Orders.objects.all()
+                orders = Orders.objects.all().values_list('customer_id__first_name', 'customer_id__last_name',
+                'customer_id__address_1', 'customer_id__address_2', 'customer_id__city', 'customer_id__state',
+                'customer_id__zip_code', 'customer_id__country', 'customer_id__country_code').distinct()
             else:
                 orders = Orders.objects.order_by("-order_date").filter(
-                    date_param | ldate_param | gdate_param | order_total1 | order_customer_id)
+                    date_param | ldate_param | gdate_param | order_total1 | order_customer_id).values_list('customer_id__first_name', 'customer_id__last_name',
+                'customer_id__address_1', 'customer_id__address_2', 'customer_id__city', 'customer_id__state',
+                'customer_id__zip_code', 'customer_id__country', 'customer_id__country_code').distinct()
+
+
                 print('else part time')
+                # print('going it or nt',Orders.objects.order_by("-order_date").filter(order_customer_id))
                 print(orders)
 
             if orders:
@@ -99,31 +106,32 @@ def home(request):
                     for i in columns:
                         print('i my meS', i)
                         if i == 'first_name':
-                            j = ord.customer_id.first_name
+                            print(ord[0])
+                            j = ord[0]
 
                         if i == 'last_name':
-                            j = ord.customer_id.last_name
+                            j = ord[1]
 
                         if i == 'address_1':
-                            j = ord.customer_id.address_1
+                            j = ord[2]
 
                         if i == 'address_2':
-                            j = ord.customer_id.address_2
+                            j = ord[3]
 
                         if i == 'city':
-                            j = ord.customer_id.city
+                            j = ord[4]
 
                         if i == 'state':
-                            j = ord.customer_id.state
+                            j = ord[5]
 
                         if i == 'zip_code':
-                            j = ord.customer_id.zip_code
+                            j = ord[6]
 
                         if i == 'country':
-                            j = ord.customer_id.country
+                            j = ord[7]
 
                         if i == 'country_code':
-                            j = ord.customer_id.country_code
+                            j = ord[8]
 
                         if j != '':
                             read.append(j)
@@ -329,8 +337,8 @@ def upload_csv(request):
                 customer_exists = Customers.objects.filter(customer_id=fields[0])
                 if customer_exists.exists():
                     print('is k andar ata hai ya nahi   ')
-                    customer_exists.delete()
-                    customer = Customers.objects.create(
+                    # customer_exists.delete()
+                    customer = customer_exists.update(
                         customer_id=fields[0],
                         first_name=fields[1],
                         last_name=fields[2],
@@ -378,10 +386,10 @@ def upload_csv(request):
 
                 print('fileldein', fields[18], fields[19])
 
-                order_exists = Orders.objects.filter(customer_id=cust[0])
+                order_exists = Orders.objects.filter(order_id=fields[15])
                 if order_exists.exists():
-                    order_exists.delete()
-                    order = Orders.objects.create(
+                    # order_exists.delete()
+                    order = order_exists.update(
                         customer_id=cust[0],
                         order_id=fields[15],
                         product_id=fields[16],
@@ -392,7 +400,6 @@ def upload_csv(request):
                         ord_media_origin=fields[23]
                     )
                     print('order is updated')
-
                 else:
                     order = Orders.objects.create(
                         customer_id=cust[0],
