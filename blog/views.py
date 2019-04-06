@@ -11,6 +11,7 @@ from django.contrib import messages
 import logging
 from datetime import datetime, timedelta
 from django.db.models import Q
+import decimal
 import xlsxwriter
 from django_project.settings import MEDIA_URL
 
@@ -51,7 +52,7 @@ def home(request):
             order_total = request.POST.get('total')
             order_count = request.POST.get('count')
 
-            order_total = 10000000000000.00 if order_total == '' else float(order_total)
+            order_total = -1 if order_total == '' else float(order_total)
             order_count = -1 if order_count == '' else int(order_count)
 
             print('totla and count', order_total, order_count)
@@ -59,37 +60,54 @@ def home(request):
             date_param = Q(order_date__range=[first, last_advent])
             ldate_param = Q(order_date__lt=lower)
             gdate_param = Q(order_date__gt=greater)
-            order_total1 = Q(order_total__gt=order_total)
+            # order_total1 = Q(order_total__gt=order_total)
 
-            print('Q hai ye', order_total1)
+            # print('Q hai ye', order_total1)
 
             customers_list = []
+            ord_total_cust = []
             all_customers = Customers.objects.all()
             order_customer_id = Q(customer_id=0)
+            order_total_cust_id = Q(customer_id=0)
             for c in all_customers:
                 customer_key = c.customer_id
                 all_orders = Orders.objects.filter(customer_id=customer_key)
                 count = 0
+                sum = 0.00
+                refund = 0.00
                 for o in all_orders:
                     customer_id = o.customer_id.customer_id
+                    order_total_value = o.order_total
+                    sum = sum + float(order_total_value)
+                    order_total_refund = o.refund_amount
+                    refund = refund + float(order_total_refund)
                     count += 1
+
+                total_sum = sum - refund
+                print('find total sum',total_sum)
+                print('is that true or false',total_sum == order_total)
+                if total_sum > order_total and order_total != -1:
+                    print('aa gya is k andar bhi bhai jaan')
+                    ord_total_cust.append(customer_id)
+                    order_total_cust_id = Q(customer_id__in=ord_total_cust)
+
                 if count > order_count and order_count != -1:
                     print('aa gya is k andar')
                     customers_list.append(customer_id)
                     order_customer_id = Q(customer_id__in=customers_list)
 
-            print('saare params ajain yahan',date_param, ldate_param, gdate_param, order_total1, order_customer_id, order_count, count)
+            print('saare params ajain yahan',date_param, ldate_param, gdate_param, order_total_cust_id, order_customer_id, order_count, count)
 
             print('i want the select *',fromDate, toDate, gDate, lDate, order_total, order_count)
 
-            if fromDate == '' and toDate == '' and gDate == '' and lDate == '' and order_total == 10000000000000.00 and order_count == -1:
+            if fromDate == '' and toDate == '' and gDate == '' and lDate == '' and order_total == -1 and order_count == -1:
                 print('if part time')
                 orders = Orders.objects.all().values_list('customer_id__first_name', 'customer_id__last_name',
                 'customer_id__address_1', 'customer_id__address_2', 'customer_id__city', 'customer_id__state',
                 'customer_id__zip_code', 'customer_id__country', 'customer_id__country_code').distinct()
             else:
                 orders = Orders.objects.order_by("-order_date").filter(
-                    date_param | ldate_param | gdate_param | order_total1 | order_customer_id).values_list('customer_id__first_name', 'customer_id__last_name',
+                    date_param | ldate_param | gdate_param | order_total_cust_id | order_customer_id).values_list('customer_id__first_name', 'customer_id__last_name',
                 'customer_id__address_1', 'customer_id__address_2', 'customer_id__city', 'customer_id__state',
                 'customer_id__zip_code', 'customer_id__country', 'customer_id__country_code').distinct()
 
@@ -384,6 +402,9 @@ def upload_csv(request):
                 if fields[19] == '':
                     fields[19] = 0.00
 
+                if fields[22] == '':
+                    fields[22] = 0.00
+
                 print('fileldein', fields[18], fields[19])
 
                 order_exists = Orders.objects.filter(order_id=fields[15])
@@ -397,6 +418,7 @@ def upload_csv(request):
                         unit_price=fields[18],
                         order_total=fields[19],
                         order_detail=fields[20],
+                        refund_amount=fields[22],
                         ord_media_origin=fields[23]
                     )
                     print('order is updated')
@@ -409,6 +431,7 @@ def upload_csv(request):
                         unit_price=fields[18],
                         order_total=fields[19],
                         order_detail=fields[20],
+                        refund_amount=fields[22],
                         ord_media_origin=fields[23]
                     )
                     print('order is not updated')
