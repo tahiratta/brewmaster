@@ -106,7 +106,7 @@ def home(request):
                 'customer_id__address_1', 'customer_id__address_2', 'customer_id__city', 'customer_id__state',
                 'customer_id__zip_code', 'customer_id__country', 'customer_id__country_code').distinct()
             else:
-                orders = Orders.objects.order_by("-order_date").filter(
+                orders = Orders.objects.filter(
                     date_param | ldate_param | gdate_param | order_total_cust_id | order_customer_id).values_list('customer_id__first_name', 'customer_id__last_name',
                 'customer_id__address_1', 'customer_id__address_2', 'customer_id__city', 'customer_id__state',
                 'customer_id__zip_code', 'customer_id__country', 'customer_id__country_code').distinct()
