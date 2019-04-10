@@ -67,8 +67,8 @@ def home(request):
             customers_list = []
             ord_total_cust = []
             all_customers = Customers.objects.all()
-            order_customer_id = Q(customer_id=0)
-            order_total_cust_id = Q(customer_id=0)
+            order_customer_id = 0
+            order_total_cust_id = 0
             for c in all_customers:
                 customer_key = c.customer_id
                 all_orders = Orders.objects.filter(customer_id=customer_key)
@@ -105,13 +105,332 @@ def home(request):
                 orders = Orders.objects.all().values_list('customer_id__first_name', 'customer_id__last_name',
                 'customer_id__address_1', 'customer_id__address_2', 'customer_id__city', 'customer_id__state',
                 'customer_id__zip_code', 'customer_id__country', 'customer_id__country_code').distinct()
-            else:
+            elif date_param and fromDate != '' and toDate != '' and lDate == '' and gDate == '' and order_total_cust_id == 0 and order_total == -1 and order_customer_id == 0 and order_count == -1:
                 orders = Orders.objects.filter(
-                    date_param | ldate_param | gdate_param | order_total_cust_id | order_customer_id).values_list('customer_id__first_name', 'customer_id__last_name',
+                    date_param).values_list('customer_id__first_name', 'customer_id__last_name',
                 'customer_id__address_1', 'customer_id__address_2', 'customer_id__city', 'customer_id__state',
                 'customer_id__zip_code', 'customer_id__country', 'customer_id__country_code').distinct()
+                print('date_param part time')
+                print(orders)
+            elif ldate_param and lDate != '' and fromDate == '' and toDate == '' and gDate == '' and order_total_cust_id == 0 and order_total == -1 and order_customer_id == 0 and order_count == -1:
+                orders = Orders.objects.filter(
+                    ldate_param).values_list('customer_id__first_name', 'customer_id__last_name',
+                'customer_id__address_1', 'customer_id__address_2', 'customer_id__city', 'customer_id__state',
+                'customer_id__zip_code', 'customer_id__country', 'customer_id__country_code').distinct()
+                print('ldate_param part time')
+                print(orders)
+            elif gdate_param and gDate != '' and lDate == '' and fromDate == '' and toDate == '' and order_total_cust_id == 0 and order_total == -1 and order_customer_id == 0 and order_count == -1:
+                orders = Orders.objects.filter(
+                    gdate_param).values_list('customer_id__first_name', 'customer_id__last_name',
+                'customer_id__address_1', 'customer_id__address_2', 'customer_id__city', 'customer_id__state',
+                'customer_id__zip_code', 'customer_id__country', 'customer_id__country_code').distinct()
+                print('gdate_param part time')
+                print(orders)
+            elif order_total_cust_id and order_total != -1 and fromDate == '' and toDate == '' and gDate == '' and lDate == '' and order_total_cust_id != 0 and order_customer_id == 0 and order_count == -1:
+                orders = Orders.objects.filter(
+                    order_total_cust_id).values_list('customer_id__first_name', 'customer_id__last_name',
+                'customer_id__address_1', 'customer_id__address_2', 'customer_id__city', 'customer_id__state',
+                'customer_id__zip_code', 'customer_id__country', 'customer_id__country_code').distinct()
+                print('order_total part time')
+                print(orders)
+            elif order_customer_id and order_count != -1 and fromDate == '' and toDate == '' and gDate == '' and lDate == '' and order_total_cust_id == 0 and order_total == -1 and order_customer_id != 0:
+                orders = Orders.objects.filter(
+                    order_customer_id).values_list('customer_id__first_name', 'customer_id__last_name',
+                'customer_id__address_1', 'customer_id__address_2', 'customer_id__city', 'customer_id__state',
+                'customer_id__zip_code', 'customer_id__country', 'customer_id__country_code').distinct()
+                print('order_count part time')
+                print(orders)
 
+#2 pair combinations for date params
+            elif date_param and ldate_param and fromDate != '' and toDate != '' and lDate != '' and gDate == '' and order_total_cust_id == 0 and order_total == -1 and order_customer_id == 0 and order_count == -1:
+                orders = Orders.objects.filter(
+                    date_param & ldate_param).values_list('customer_id__first_name', 'customer_id__last_name',
+                                            'customer_id__address_1', 'customer_id__address_2', 'customer_id__city',
+                                            'customer_id__state',
+                                            'customer_id__zip_code', 'customer_id__country',
+                                            'customer_id__country_code').distinct()
+                print('2 date_param and ldate_param part time')
+            elif date_param and gdate_param and fromDate != '' and toDate != '' and lDate == '' and gDate != '' and order_total_cust_id == 0 and order_total == -1 and order_customer_id == 0 and order_count == -1:
+                orders = Orders.objects.filter(
+                    date_param & gdate_param).values_list('customer_id__first_name', 'customer_id__last_name',
+                                            'customer_id__address_1', 'customer_id__address_2', 'customer_id__city',
+                                            'customer_id__state',
+                                            'customer_id__zip_code', 'customer_id__country',
+                                            'customer_id__country_code').distinct()
+                print('2 date_param and gdate_param part time')
+            elif date_param and order_total_cust_id and order_total != -1 and fromDate != '' and toDate != '' and lDate == '' and gDate == '' and order_total_cust_id != 0 and order_customer_id == 0 and order_count == -1:
+                orders = Orders.objects.filter(
+                    date_param & order_total_cust_id).values_list('customer_id__first_name', 'customer_id__last_name',
+                                            'customer_id__address_1', 'customer_id__address_2', 'customer_id__city',
+                                            'customer_id__state',
+                                            'customer_id__zip_code', 'customer_id__country',
+                                            'customer_id__country_code').distinct()
+                print('2 date_param and order_total_cust_id part time')
+            elif date_param and order_customer_id and order_count != -1 and fromDate != '' and toDate != '' and lDate == '' and gDate == '' and order_total_cust_id == 0 and order_total == -1 and order_customer_id != 0:
+                orders = Orders.objects.filter(
+                    date_param & order_customer_id).values_list('customer_id__first_name', 'customer_id__last_name',
+                                            'customer_id__address_1', 'customer_id__address_2', 'customer_id__city',
+                                            'customer_id__state',
+                                            'customer_id__zip_code', 'customer_id__country',
+                                            'customer_id__country_code').distinct()
+                print('2 date_param and order_customer_id part time')
 
+# 2 pair combinations for ldate params
+            elif ldate_param and gdate_param and lDate != '' and fromDate == '' and toDate == '' and gDate != '' and order_total_cust_id == 0 and order_total == -1 and order_customer_id == 0 and order_count == -1:
+                orders = Orders.objects.filter(
+                    ldate_param & gdate_param).values_list('customer_id__first_name', 'customer_id__last_name',
+                                             'customer_id__address_1', 'customer_id__address_2', 'customer_id__city',
+                                             'customer_id__state',
+                                             'customer_id__zip_code', 'customer_id__country',
+                                             'customer_id__country_code').distinct()
+                print('2 ldate_param and gdate param part time')
+            elif ldate_param and order_total_cust_id and order_total != 1 and lDate != '' and fromDate == '' and toDate == '' and gDate == '' and order_total_cust_id != 0 and order_customer_id == 0 and order_count == -1:
+                orders = Orders.objects.filter(
+                    ldate_param & order_total_cust_id).values_list('customer_id__first_name', 'customer_id__last_name',
+                                             'customer_id__address_1', 'customer_id__address_2', 'customer_id__city',
+                                             'customer_id__state',
+                                             'customer_id__zip_code', 'customer_id__country',
+                                             'customer_id__country_code').distinct()
+                print('2 ldate_param and order_total_cust_id param part time')
+            elif ldate_param and order_customer_id and order_count != -1 and lDate != '' and fromDate == '' and toDate == '' and gDate == '' and order_total_cust_id == 0 and order_total == -1 and order_customer_id != 0:
+                orders = Orders.objects.filter(
+                    ldate_param & order_customer_id).values_list('customer_id__first_name', 'customer_id__last_name',
+                                             'customer_id__address_1', 'customer_id__address_2', 'customer_id__city',
+                                             'customer_id__state',
+                                             'customer_id__zip_code', 'customer_id__country',
+                                             'customer_id__country_code').distinct()
+                print('2 ldate_param and order_customer_id param part time')
+
+# 2 pair combinations for gdate params
+            elif gdate_param and order_total_cust_id and order_total != -1 and gDate != '' and lDate == '' and fromDate == '' and toDate == '' and order_total_cust_id != 0 and order_customer_id == 0 and order_count == -1:
+                orders = Orders.objects.filter(
+                    gdate_param & order_total_cust_id).values_list('customer_id__first_name', 'customer_id__last_name',
+                                             'customer_id__address_1', 'customer_id__address_2', 'customer_id__city',
+                                             'customer_id__state',
+                                             'customer_id__zip_code', 'customer_id__country',
+                                             'customer_id__country_code').distinct()
+                print('gdate_param and order_total_cust_id part time')
+            elif gdate_param and order_customer_id and order_count != -1 and gDate != '' and lDate == '' and fromDate == '' and toDate == '' and order_total_cust_id == 0 and order_total == -1 and order_customer_id != 0:
+                orders = Orders.objects.filter(
+                    gdate_param & order_customer_id).values_list('customer_id__first_name', 'customer_id__last_name',
+                                             'customer_id__address_1', 'customer_id__address_2', 'customer_id__city',
+                                             'customer_id__state',
+                                             'customer_id__zip_code', 'customer_id__country',
+                                             'customer_id__country_code').distinct()
+                print('gdate_param and order_customer_id part time')
+
+# 2 pair combinations for order_total params
+            elif order_total_cust_id and order_customer_id and order_total != -1 and fromDate == '' and toDate == '' and gDate == '' and lDate == '' and order_total_cust_id != 0 and order_customer_id != 0 and order_count != -1:
+                orders = Orders.objects.filter(
+                    order_total_cust_id & order_customer_id).values_list('customer_id__first_name', 'customer_id__last_name',
+                                                     'customer_id__address_1', 'customer_id__address_2',
+                                                     'customer_id__city', 'customer_id__state',
+                                                     'customer_id__zip_code', 'customer_id__country',
+                                                     'customer_id__country_code').distinct()
+                print('order_total and order count part time')
+
+            #yahna se start gua hgadsbchasdbkidsbciUSDVSDBVIUDSVIUDSB
+            #1
+            elif date_param and ldate_param and gdate_param and fromDate != '' and toDate != '' and lDate != '' and gDate != '' and order_total_cust_id == 0 and order_total == -1 and order_customer_id == 0 and order_count == -1:
+                orders = Orders.objects.filter(
+                    date_param & ldate_param & gdate_param).values_list('customer_id__first_name', 'customer_id__last_name',
+                                            'customer_id__address_1', 'customer_id__address_2', 'customer_id__city',
+                                            'customer_id__state',
+                                            'customer_id__zip_code', 'customer_id__country',
+                                            'customer_id__country_code').distinct()
+                print('3 date_param, ldate param, gdate param part time')
+            #2
+            elif date_param and ldate_param and order_total_cust_id and lDate != '' and fromDate != '' and toDate != '' and gDate == '' and order_total_cust_id != 0 and order_total != -1 and order_customer_id == 0 and order_count == -1:
+                orders = Orders.objects.filter(
+                    date_param & ldate_param & order_total_cust_id).values_list('customer_id__first_name', 'customer_id__last_name',
+                                             'customer_id__address_1', 'customer_id__address_2', 'customer_id__city',
+                                             'customer_id__state',
+                                             'customer_id__zip_code', 'customer_id__country',
+                                             'customer_id__country_code').distinct()
+                print('3 date param, ldate_param, order_total param part time')
+            #3
+            elif date_param and ldate_param and order_customer_id and fromDate != '' and toDate != '' and lDate != '' and gDate == '' and order_total_cust_id == 0 and order_total == -1 and order_customer_id != 0 and order_count != -1:
+                orders = Orders.objects.filter(
+                    date_param & ldate_param & order_customer_id).values_list('customer_id__first_name', 'customer_id__last_name',
+                                             'customer_id__address_1', 'customer_id__address_2', 'customer_id__city',
+                                             'customer_id__state',
+                                             'customer_id__zip_code', 'customer_id__country',
+                                             'customer_id__country_code').distinct()
+                print('3 date param, ldate_param and order count part time')
+            #4
+            elif date_param and gdate_param and order_total_cust_id and lDate == '' and fromDate != '' and toDate != '' and gDate != '' and order_total_cust_id != 0 and order_total != -1 and order_customer_id == 0 and order_count == -1:
+                orders = Orders.objects.filter(
+                    date_param & gdate_param & order_total_cust_id).values_list('customer_id__first_name',
+                                                                                    'customer_id__last_name',
+                                                                                'customer_id__address_1',
+                                                                                'customer_id__address_2',
+                                                                                'customer_id__city',
+                                                                                'customer_id__state',
+                                                                                'customer_id__zip_code',
+                                                                                'customer_id__country',
+                                                                                'customer_id__country_code').distinct()
+                print('3 date param, gdate_param, order_total param part time')
+            #5
+            elif date_param and gdate_param and order_customer_id and fromDate != '' and toDate != '' and gDate != '' and lDate == '' and order_total_cust_id == 0 and order_total == -1 and order_customer_id != 0 and order_count != -1:
+                orders = Orders.objects.filter(
+                    date_param & gdate_param & order_customer_id).values_list('customer_id__first_name',
+                                                                              'customer_id__last_name',
+                                                                              'customer_id__address_1',
+                                                                              'customer_id__address_2',
+                                                                              'customer_id__city',
+                                                                              'customer_id__state',
+                                                                              'customer_id__zip_code',
+                                                                              'customer_id__country',
+                                                                              'customer_id__country_code').distinct()
+                print('3 date param, gdate_param and order count part time')
+
+            #6
+            elif date_param and order_total_cust_id and order_customer_id and fromDate != '' and toDate != '' and gDate == '' and lDate == '' and order_total_cust_id != 0 and order_total != -1 and order_customer_id != 0 and order_count != -1:
+                orders = Orders.objects.filter(
+                    date_param & order_total_cust_id & order_customer_id).values_list('customer_id__first_name',
+                                                                              'customer_id__last_name',
+                                                                              'customer_id__address_1',
+                                                                              'customer_id__address_2',
+                                                                              'customer_id__city',
+                                                                              'customer_id__state',
+                                                                              'customer_id__zip_code',
+                                                                              'customer_id__country',
+                                                                              'customer_id__country_code').distinct()
+                print('3 date param, order total and order count part time')
+            #7
+            elif ldate_param and gdate_param and order_total_cust_id and fromDate == '' and toDate == '' and gDate != '' and lDate != '' and order_total_cust_id != 0 and order_total != -1 and order_customer_id == 0 and order_count == -1:
+                orders = Orders.objects.filter(
+                    ldate_param & gdate_param & order_total_cust_id).values_list('customer_id__first_name',
+                                                                              'customer_id__last_name',
+                                                                              'customer_id__address_1',
+                                                                              'customer_id__address_2',
+                                                                              'customer_id__city',
+                                                                              'customer_id__state',
+                                                                              'customer_id__zip_code',
+                                                                              'customer_id__country',
+                                                                              'customer_id__country_code').distinct()
+                print('3 ldate param, gdate_param and order_total_cust_id part time')
+            #8
+            elif ldate_param and gdate_param and order_customer_id and fromDate == '' and toDate == '' and gDate != '' and lDate != '' and order_total_cust_id == 0 and order_total == -1 and order_customer_id != 0 and order_count != -1:
+                orders = Orders.objects.filter(
+                    ldate_param & gdate_param & order_customer_id).values_list('customer_id__first_name',
+                                                                                 'customer_id__last_name',
+                                                                                 'customer_id__address_1',
+                                                                                 'customer_id__address_2',
+                                                                                 'customer_id__city',
+                                                                                 'customer_id__state',
+                                                                                 'customer_id__zip_code',
+                                                                                 'customer_id__country',
+                                                                                 'customer_id__country_code').distinct()
+                print('3 ldate param, gdate_param and order_customer_id part time')
+            #9
+            elif ldate_param and order_total_cust_id and order_customer_id and fromDate == '' and toDate == '' and gDate == '' and lDate != '' and order_total_cust_id != 0 and order_total != -1 and order_customer_id != 0 and order_count != -1:
+                orders = Orders.objects.filter(
+                    ldate_param & order_total_cust_id & order_customer_id).values_list('customer_id__first_name',
+                                                                                      'customer_id__last_name',
+                                                                                      'customer_id__address_1',
+                                                                                      'customer_id__address_2',
+                                                                                      'customer_id__city',
+                                                                                      'customer_id__state',
+                                                                                      'customer_id__zip_code',
+                                                                                      'customer_id__country',
+                                                                                      'customer_id__country_code').distinct()
+                print('3 ldate_param, order total and order count part time')
+
+            #10
+            elif gdate_param and order_total_cust_id and order_customer_id and fromDate == '' and toDate == '' and gDate != '' and lDate == '' and order_total_cust_id != 0 and order_total != -1 and order_customer_id != 0 and order_count != -1:
+                orders = Orders.objects.filter(
+                    gdate_param & order_total_cust_id & order_customer_id).values_list('customer_id__first_name',
+                                                                                       'customer_id__last_name',
+                                                                                       'customer_id__address_1',
+                                                                                       'customer_id__address_2',
+                                                                                       'customer_id__city',
+                                                                                       'customer_id__state',
+                                                                                       'customer_id__zip_code',
+                                                                                       'customer_id__country',
+                                                                                       'customer_id__country_code').distinct()
+                print('3 gdate_param, order total and order count part time')
+            #11
+            #4 combinations
+            elif date_param and ldate_param and gdate_param and order_total_cust_id and fromDate != '' and toDate != '' and lDate != '' and gDate != '' and order_total_cust_id != 0 and order_total != -1 and order_customer_id == 0 and order_count == -1:
+                orders = Orders.objects.filter(
+                    date_param & ldate_param & gdate_param & order_total_cust_id).values_list('customer_id__first_name',
+                                                                        'customer_id__last_name',
+                                                                        'customer_id__address_1',
+                                                                        'customer_id__address_2', 'customer_id__city',
+                                                                        'customer_id__state',
+                                                                        'customer_id__zip_code', 'customer_id__country',
+                                                                        'customer_id__country_code').distinct()
+                print('4 date_param, ldate param, gdate param and order_total_cust_id part time')
+            #12
+            elif date_param and ldate_param and gdate_param and order_customer_id and fromDate != '' and toDate != '' and lDate != '' and gDate != '' and order_total_cust_id == 0 and order_total == -1 and order_customer_id != 0 and order_count != -1:
+                orders = Orders.objects.filter(
+                    date_param & ldate_param & gdate_param & order_customer_id).values_list('customer_id__first_name',
+                                                                                              'customer_id__last_name',
+                                                                                              'customer_id__address_1',
+                                                                                              'customer_id__address_2',
+                                                                                              'customer_id__city',
+                                                                                              'customer_id__state',
+                                                                                              'customer_id__zip_code',
+                                                                                              'customer_id__country',
+                                                                                              'customer_id__country_code').distinct()
+                print('4 date_param, ldate param, gdate param and order_customer_id part time')
+            #13
+
+            elif date_param and ldate_param and order_total_cust_id and order_customer_id and fromDate != '' and toDate != '' and lDate != '' and gDate == '' and order_total_cust_id != 0 and order_total != -1 and order_customer_id != 0 and order_count != -1:
+                orders = Orders.objects.filter(
+                    date_param & ldate_param & order_total_cust_id & order_customer_id).values_list('customer_id__first_name',
+                                                                                            'customer_id__last_name',
+                                                                                            'customer_id__address_1',
+                                                                                            'customer_id__address_2',
+                                                                                            'customer_id__city',
+                                                                                            'customer_id__state',
+                                                                                            'customer_id__zip_code',
+                                                                                            'customer_id__country',
+                                                                                            'customer_id__country_code').distinct()
+                print('4 date_param, ldate param, order_total_cust_id param and order_customer_id part time')
+            #14
+            elif date_param and gdate_param and order_total_cust_id and order_customer_id and fromDate != '' and toDate != '' and lDate == '' and gDate != '' and order_total_cust_id != 0 and order_total != -1 and order_customer_id != 0 and order_count != -1:
+                orders = Orders.objects.filter(
+                    date_param & gdate_param & order_total_cust_id & order_customer_id).values_list(
+                    'customer_id__first_name',
+                    'customer_id__last_name',
+                    'customer_id__address_1',
+                    'customer_id__address_2',
+                    'customer_id__city',
+                    'customer_id__state',
+                    'customer_id__zip_code',
+                    'customer_id__country',
+                    'customer_id__country_code').distinct()
+                print('4 date_param, gdate param, order_total_cust_id param and order_customer_id part time')
+
+            #15
+            elif ldate_param and gdate_param and order_total_cust_id and order_customer_id and fromDate == '' and toDate == '' and lDate != '' and gDate != '' and order_total_cust_id != 0 and order_total != -1 and order_customer_id != 0 and order_count != -1:
+                orders = Orders.objects.filter(
+                    ldate_param & gdate_param & order_total_cust_id & order_customer_id).values_list(
+                    'customer_id__first_name',
+                    'customer_id__last_name',
+                    'customer_id__address_1',
+                    'customer_id__address_2',
+                    'customer_id__city',
+                    'customer_id__state',
+                    'customer_id__zip_code',
+                    'customer_id__country',
+                    'customer_id__country_code').distinct()
+                print('4 ldate_param, gdate param, order_total_cust_id param and order_customer_id part time')
+            #dsjcbsdhcdhdshucewuhcbweuhcbwdyucbdwuycbewy
+            elif order_total_cust_id == 0 and order_total != -1 or order_customer_id == 0 and order_count != -1:
+                order_total_cust_id = Q(customer_id=0)
+                order_customer_id = Q(customer_id=0)
+                orders = Orders.objects.filter(order_total_cust_id | order_customer_id)
+                print('no data found 111 part time')
+            else:
+                print('ye sab print kra lo', date_param, ldate_param, order_total_cust_id , order_customer_id , fromDate , toDate , lDate , gDate,order_total_cust_id , order_total , order_customer_id , order_count )
+                orders = Orders.objects.filter(
+                    date_param & ldate_param & gdate_param & order_total_cust_id & order_customer_id).values_list(
+                    'customer_id__first_name', 'customer_id__last_name',
+                    'customer_id__address_1', 'customer_id__address_2', 'customer_id__city', 'customer_id__state',
+                    'customer_id__zip_code', 'customer_id__country', 'customer_id__country_code').distinct()
                 print('else part time')
                 # print('going it or nt',Orders.objects.order_by("-order_date").filter(order_customer_id))
                 print(orders)
